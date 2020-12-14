@@ -1,7 +1,7 @@
 # pandemic-simulator
-This simple pandemic simulator is based on an [article of S Terence] (Simulating the Pandemic in Python) intruducing a simple pandemic simulator in python. It allows entereing input parmaeters on a web interface and show the development of infected people on the fly in a time sercies graph. Some parameters that are hared wired in Terence' model have been made interaktive input. 
+This simple pandemic simulator is based on an [article of S Terence](Simulating the Pandemic in Python) intruducing a simple pandemic simulator in python. It allows user input in a web interface and shows the development of infected people on the fly in a time series graph during the simulation run. Some parameters that are hard wired in Terence' model have been made interactive input. 
 
-The following input parameters are included in this model
+The following input parameters are included in this model:
 - *startingImmunity* number of peolple immune from the beginning 
 - *startingInfecters*': number of infected people at day 1
 - *daysContagious*': number of days contagious
