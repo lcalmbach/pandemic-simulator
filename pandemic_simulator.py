@@ -61,14 +61,14 @@ def runDay():
             friendInQuestion = peopleDictionary[random.randint(0,len(peopleDictionary)-1)]
             if random.randint(0,100)<person.contagiousness and friendInQuestion.contagiousness == 0 and friendInQuestion.immunity==False:
                 friendInQuestion.contagiousness = int((norm.rvs(size=1,loc=0.5,scale=0.15)[0]*10).round(0)*10)
-                print(peopleDictionary.index(person), " >>> ", peopleDictionary.index(friendInQuestion))
+                # print(peopleDictionary.index(person), " >>> ", peopleDictionary.index(friendInQuestion))
             
     for person in [person for person in peopleDictionary if person.contagiousness>0]:
         person.contagiousDays += 1
         if person.contagiousDays > daysContagious:
             person.immunity = True
             person.contagiousness = 0
-            print("|||", peopleDictionary.index(person), " |||")
+            # print("|||", peopleDictionary.index(person), " |||")
 
 def get_plot(df):
     return alt.Chart(df).mark_line().encode(

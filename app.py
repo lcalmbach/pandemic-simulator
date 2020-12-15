@@ -1,5 +1,9 @@
 import streamlit as st
 import pandemic_simulator as sim
+import constants as cn
+
+__version__ = '0.0.1'
+__author__ = 'lcalmbach@gmail.com'
 
 def main():
     st.sidebar.markdown("### 🦠 Simple Pandemic Simulator")
@@ -13,14 +17,14 @@ def main():
     average_contacts_num = st.sidebar.number_input("Average number of contacts",0,int(numPeople),5)
     sim_days = st.sidebar.number_input("duration of simulation in days",10,365*10,100)
     lockdown_efficiency = st.sidebar.number_input("lockdown reduces encounters by (%)", 0,100,90)
-    save_scenario = st.sidebar.checkbox("Save scenario?",False)
+    save_scenario = st.sidebar.checkbox("Save scenario?", False)
+    
     if save_scenario:
         scenarioid = st.sidebar.number_input("Scenario-id", 0, 100, 1)
     
-    st.markdown("## Simulating the Pandemic in Python")
-    st.write("""A GUI for the pandemic simulator proposed by by Terence S in [Simulating the Pandemic in Python](https://towardsdatascience.com/simulating-the-pandemic-in-python-2aa8f7383b55)
-    Press start-button to start the simulation""")
-    if st.button("Start simulation"):
+    st.markdown("## Pandemic Simulator")
+    st.write(cn.APP_INFO)
+    if st.button("Start Simulation"):
         par_dic = {'numPeople':numPeople,
                     'startingImmunity':startingImmunity, 
                     'startingInfecters':startingInfecters, 
@@ -33,10 +37,11 @@ def main():
                     'lockdown_efficiency': lockdown_efficiency
         }
         sim.start(par_dic)
+        if save_scenario:
+            st.info("🚧 The 'Save scenario Option' is under construction.")
 
-    st.sidebar.info("""A [Streamlit](https://www.streamlit.io/) GUI for the covid simulator code provided by Terence S in [Simulating the Pandemic in Python](https://towardsdatascience.com/simulating-the-pandemic-in-python-2aa8f7383b55))
-            implemented by [Lukas Calmbach](mailto:lcalmbach@gmail.com).
-            """)
+    st.sidebar.info(cn.GIT_INFO)
+    
 main()
     
 
