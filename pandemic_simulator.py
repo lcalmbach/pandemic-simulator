@@ -230,7 +230,6 @@ class Simulation():
         
         df.to_csv('timeseries.csv', index = False, sep = ';') 
         pop_df = generate_population_df()
-        st.write(pop_df)
         pop_df.to_csv('population.csv', index = False, sep = ';') 
         pd.DataFrame(self.infections).to_csv('infections.csv', index = False, sep = ';') 
         
