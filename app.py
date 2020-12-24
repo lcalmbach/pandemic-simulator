@@ -16,8 +16,8 @@ def show_define_scenario_menu(sim):
         sim.num_people = st.number_input("Population", 0,1000000, value=sim.num_people)
         sim.simulation_days = st.number_input("Duration of simulation in days",1,365*10,value = sim.simulation_days)
         #sim.hospital_beds_per_1k_persons = st.number_input("Hospital beds per 1000 persons",0.0,20.0,value=sim.hospital_beds_per_1k_persons)
-        sim.average_friends_num = st.number_input("Average number of friends (daily contact)",0,int(sim.num_people),value=int(sim.average_friends_num))
-        sim.average_contacts_num = st.number_input("Average number of contacts (random (contact)",0,int(sim.num_people),value=int(sim.average_contacts_num))
+        sim.avg_friends_num = st.number_input("Average number of friends (daily contact)",0,int(sim.num_people),value=int(sim.avg_friends_num))
+        sim.avg_contacts_num = st.number_input("Average number of contacts (random (contact)",0,int(sim.num_people),value=int(sim.avg_contacts_num))
         sim.std_factor = st.number_input("standard deviation factor (1 = normal)",0.1,10.0, 1.0)
 
     #with st.beta_expander("Population", expanded=True):
@@ -27,12 +27,11 @@ def show_define_scenario_menu(sim):
     #    st.write(f'population age 0 - 30: {sim.num_young}')
 
     with st.beta_expander("Infection settings", expanded=True):
-        sim.average_contagiousness = st.number_input("Average contagiousness (0-100)",0,100,value=sim.average_contagiousness)
-        sim.average_immunity = st.number_input("average immunity (0-100)",0,100,value=sim.average_immunity)
+        sim.avg_chance_infection = st.number_input("Average chance of infection per contact (0-100)",0,100,value=sim.avg_chance_infection)
         sim.startingInfecters =  st.number_input("How many people will be infectious at t=0",0,int(sim.num_people),value=sim.startingInfecters)
         st.write(sim.avg_days_contagious)
         sim.avg_days_contagious =  st.number_input("How many days contagious on average", 1, 100,value=sim.avg_days_contagious)
-        #sim.average_hospitalization_duration = st.number_input("Average number of hospital days",0,100,value=sim.average_hospitalization_duration)
+        #sim.avg_hospitalization_duration = st.number_input("Average number of hospital days",0,100,value=sim.avg_hospitalization_duration)
         #sim.hospitalization_rate = st.number_input("Hospitalized per 1000 infected and day",0.0,1000/sim.avg_days_contagious, value=float(sim.hospitalization_rate))
         #sim.mortality_rate = st.number_input("Mortality rate (per day and 1000 hospitalized)",0.0,1000/sim.avg_days_contagious, value=float(sim.mortality_rate))
   
@@ -44,7 +43,6 @@ def show_define_scenario_menu(sim):
         sim.mask_day_end =  st.number_input("End day for masks to be used", 0,sim.simulation_days,sim.mask_day_end)
         sim.mask_efficiency = st.number_input("Masks reduces risk of infection by (%))", 0,100,sim.mask_efficiency)
         
-    
     sim.save()
     st.write()
     st.markdown('To create a new scenario, write the scenario name into te field below and press the `New scenario` button. ')

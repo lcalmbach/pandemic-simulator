@@ -15,7 +15,6 @@ class Simulation():
         self.num_elderly = 0
         self.num_midage = 0
         self.num_young = 0
-        self.startingImmunity = 0
         self.startingInfecters = 0
         self.avg_days_contagious = 0
         self.lockdown_day_start = 0
@@ -23,14 +22,15 @@ class Simulation():
         self.mask_day_start = 0
         self.mask_day_end = 0
         self.mask_efficiency = 0
-        self.average_friends_num = 0
-        self.average_contacts_num = 0
+        self.avg_friends_num = 0
+        self.avg_contacts_num = 0
+        self.avg_chance_infection = 0
         self.simulation_days = 0
         self.lockdown_efficiency = 0
         self.mortality_rate = 0
         self.hospitalization_rate = 0
         self.current_lockdown_factor = 0
-        self.average_hospitalization_duration = 0
+        self.avg_hospitalization_duration = 0
         self.hospital_beds_per_1k_persons = 0
         self.people_df = pd.DataFrame(columns=['index', 'starting_immunity', 'ending_immunity', 'number_infected'])
         self.std_factor = 1
@@ -56,22 +56,21 @@ class Simulation():
         self.mask_day_start = setup["mask_day_start"]
         self.mask_day_end = setup["mask_day_end"]
         self.mask_efficiency = setup["mask_efficiency"]
-        self.average_friends_num = setup["average_friends_num"]
-        self.average_contacts_num = setup["average_contacts_num"]
+        self.avg_friends_num = setup["avg_friends_num"]
+        self.avg_contacts_num = setup["avg_contacts_num"]
         self.simulation_days = setup["simulation_days"]
-        self.average_contagiousness = setup["average_contagiousness"] 
-        self.average_immunity = setup["average_immunity"]
+        self.avg_chance_infection = setup["avg_chance_infection"] 
         self.std_factor = setup["std_factor"]
+
 
         self.mortality_rate = setup["mortality_rate"]
         self.hospitalization_rate = setup["hospitalization_rate"]
-        self.average_hospitalization_duration = setup["average_hospitalization_duration"]
+        self.avg_hospitalization_duration = setup["avg_hospitalization_duration"]
         self.hospital_beds_per_1k_persons = setup["hospital_beds_per_1k_persons"]
         self.num_people = setup["num_people"]
         self.num_elderly = setup["num_elderly"]
         self.num_midage = setup["num_midage"]
         self.num_young = setup["num_young"]
-
 
     def save(self):
         setup = self.scenarios[self.name]
@@ -87,11 +86,10 @@ class Simulation():
         setup["mask_day_start"] = self.mask_day_start 
         setup["mask_day_end"] = self.mask_day_end 
         setup["mask_efficiency"] = self.mask_efficiency 
-        setup["average_friends_num"] = self.average_friends_num 
-        setup["average_contacts_num"] = self.average_contacts_num
+        setup["avg_friends_num"] = self.avg_friends_num 
+        setup["avg_contacts_num"] = self.avg_contacts_num
         setup["simulation_days"] = self.simulation_days        
-        setup["average_contagiousness"] = self.average_contagiousness 
-        setup["average_immunity"] = self.average_immunity 
+        setup["avg_chance_infection"] = self.avg_chance_infection 
         setup["std_factor"] = self.std_factor 
         setup["avg_days_contagious"] = self.avg_days_contagious
 
@@ -100,22 +98,27 @@ class Simulation():
         #setup["num_young"] = self.num_young 7
         #setup["mortality_rate"] = self.mortality_rate 
         #setup["hospitalization_rate"] = self.hospitalization_rate 
-        #setup["average_hospitalization_duration"] = self.average_hospitalization_duration 
+        #setup["avg_hospitalization_duration"] = self.avg_hospitalization_duration 
         #setup["hospital_beds_per_1k_persons"] = self.hospital_beds_per_1k_persons 
         
         with open('scenarios.json', 'wt') as myfile:
             json.dump(self.scenarios, myfile)
 
     def show_setting(self):
-        st.write(f"num_people: {self.num_people}")
-        st.write(f"startingInfecters: {self.startingInfecters}")
-        st.write(f"avg_days_contagious: {self.avg_days_contagious}")
-        st.write(f"mask_efficiency: {self.mask_efficiency}")
-        st.write(f"average_friends_num: {self.average_friends_num}")
-        st.write(f"simulation_days: {self.simulation_days}")
-        st.write(f"lockdown_efficiency: {self.lockdown_efficiency}")
-        st.write(f"average_contagiousness: {self.average_contagiousness}")
-        st.write(f"average_immunity: {self.average_immunity}") 
+        st.write(f"population: {self.num_people}")
+        st.write(f"simulation days: {self.simulation_days}")
+        st.write(f"Number of infected persons at t=0: {self.startingInfecters}")
+        st.write(f"Average days of contagiousness: {self.avg_days_contagious}")
+        st.write(f"Average number of friends: {self.avg_friends_num}")
+        st.write(f"Average number of random contacts: {self.avg_contacts_num}")
+        st.write(f"Mask efficiency (% reduction of ratio infections/contacts): {self.mask_efficiency}")
+        st.write(f"lockdown efficiency (reduction of contacts %): {self.lockdown_efficiency}")
+        st.write(f"Average chance infection per contact: {self.avg_chance_infection}")
+        st.write(f"lockdown: from day {self.lockdown_day_start} to day {self.lockdown_day_end}")
+        st.write(f"lockdown reduces contacts by {self.lockdown_efficiency}%")
+        st.write(f"Mask mandatory from day {self.mask_day_start} to day {self.mask_day_end}")
+        st.write(f"Masks reduce risk of contagion by {self.mask_efficiency}%")
+
 
     def init_schedules(self):
         """ generates a value for each day starting at set contagiousness, then dropping after 25% of days to 75%
@@ -156,22 +159,26 @@ class Simulation():
             person.init_friends()
         for x in range(0, self.startingInfecters):
             id = random.randint(0,len(self.peopleDictionary)-1)
-            self.peopleDictionary[id].contagiousness = 100
+            self.peopleDictionary[id].status = 'a'
         
         # initiate_age_groups()
         print('population initialized')
-        print('initializing immunity')
         
+
     def runDay(self):
         #this section simulates the spread, so it only operates on contagious people, thus:
-        for infector in [person for person in self.peopleDictionary if person.contagiousness > 0]:
-            infector.make_daily_contacts()
-            infector.init_contagiousness()
-            for person_met in infector.contacts:                
-                infector.meet(person_met)
+        all_contacts = []
+        for infector in [person for person in self.peopleDictionary if person.is_contagious()]:
+            all_contacts += infector.get_daily_contacts()
         
-        for person in [person for person in self.peopleDictionary if person.is_contagious()]:
-            person.spend_sick_day()
+        # contacts taht result in an infection:
+        factor = self.avg_chance_infection * self.lockdown_schedule[self.day] * self.mask_schedule[self.day]
+        infections = random.sample(all_contacts, int(round(len(all_contacts) * factor / 100, 0)))
+        for infection in infections:     
+            infection['infector'].infect(infection['infected'])
+        
+        for contagious_person in [person for person in self.peopleDictionary if person.is_contagious()]:
+            contagious_person.spend_sick_day()
     
     
     def run(self):  
@@ -181,7 +188,6 @@ class Simulation():
                 df=df.append(person.get_record(), ignore_index=True)
             return df
 
-        lockdown = False
         self.init_schedules()
         self.initiate_peopleDictionary()
         st.info('Population is initialized')
@@ -190,8 +196,11 @@ class Simulation():
         plot_infections = st.empty()
         plot_r = st.empty()
         plot_fatalities = st.empty()
+        num_infected_last_week = 0
+        num_infected_last_week = 0
+        avg_r = 0
 
-        df = pd.DataFrame({'day': [], 'legend': [], 'value': []})
+        df = pd.DataFrame({'day': [], 'legend': [], 'cases': []})
         for x in range(1,self.simulation_days):
             self.day = x
             self.daily_infections = 0
@@ -199,32 +208,32 @@ class Simulation():
             #if lockdown day is reached, encounters are reduced by self.current_lockdown_factor
             if x==self.lockdown_day_start:
                 self.current_lockdown_factor = (100-self.lockdown_efficiency) / 100
-                
-            if x == self.mask_day_start:
-                for person in self.peopleDictionary:
-                    person.wearMask()
-            
+                            
             # infectors = 
             daily_infectors = len([person for person in self.peopleDictionary if person.is_contagious()])
             self.runDay()
-            num_infected = len([person for person in self.peopleDictionary if person.is_contagious()])
-            num_immune = len([person for person in self.peopleDictionary if person.immunity == 100])
+            if self.day >= 7:
+                infectors_1week_ago = [person for person in self.peopleDictionary if person.infection_day == self.day - 7]
+                num_infections_last_week = len([person for person in self.peopleDictionary if person.infected_by in infectors_1week_ago]) 
+                avg_r = num_infections_last_week / len(infectors_1week_ago) if len(infectors_1week_ago) != 0 else 0
+            num_infected = len([person for person in self.peopleDictionary if person.is_contagious()]) 
+            num_immune = len([person for person in self.peopleDictionary if person.status == 'r'])
             immune_pct = round((num_immune / self.num_people * 100),0)
-            average_r = (self.daily_infections) / daily_infectors if daily_infectors > 0 else 0
+            
             day_text.write(f'day {x+1}: people infected, Total infected={num_infected},{self.total_infections} immune: {num_immune} ({immune_pct}%)')
             
-            data = {'day': x,'legend': 'num_infected', 'value': num_infected}
+            data = {'day': x,'legend': 'num_infected', 'cases': num_infected}
             df = df.append(data, ignore_index=True)
-            data = {'day': x,'legend': 'num_immune', 'value': num_immune}
+            data = {'day': x,'legend': 'num_immune', 'cases': num_immune}
             df = df.append(data, ignore_index=True)
-            data = {'day': x,'legend': 'total_infected', 'value': self.total_infections}
+            data = {'day': x,'legend': 'total_infected', 'cases': self.total_infections}
             df = df.append(data, ignore_index=True)
             # ratio of infected / infectors
             
-            data = {'day': x,'legend': 'average_r', 'value': average_r}
+            data = {'day': x,'legend': 'avg_r', 'cases': avg_r}
             df = df.append(data, ignore_index=True)
             plot_infections.altair_chart(get_plot(df, self.simulation_days, ['num_infected','num_immune','num_infected']))
-            plot_r.altair_chart(get_plot(df, self.simulation_days,['average_r']))
+            plot_r.altair_chart(get_plot(df, self.simulation_days,['avg_r']))
             if num_infected == 0:
                 break
         
@@ -247,14 +256,12 @@ class Person():
     def __init__(self, sim: Simulation, id: int):
         self.simulation = sim
         self.index=id
-        self.immunity = 0
         self.contagious_days = 0
-        self.contagiousness = 0
         self.symptoms = 0 # 0 - 10
         self.hospitalized_days = 0
         self.age_group = 1     
         self.status = 'h' #I: initial, a: active, h: hospitalized, d: dead i: isolated
-        self.infection_day = 0
+        self.infection_day = -99
         self.num_of_friends = self.init_num_of_friends() 
         self.friends = []
         self.contacts = []
@@ -272,80 +279,58 @@ class Person():
             }
         return row
 
-    def make_daily_contacts(self):
-        num = norm.rvs(size=1,loc=0.5,scale=0.15)[0] * self.simulation.average_contacts_num * 2
+    def get_daily_contacts(self):
+        num = norm.rvs(size=1,loc=0.5,scale=0.15)[0] * self.simulation.avg_contacts_num * 2
         num = int((num * self.simulation.lockdown_schedule[self.simulation.day]).round(0))
         num = 0 if num < 0 else num
         rand_contacts = random.sample(self.simulation.peopleDictionary, num)
         # if one has only one friend he is met dayliy, otherwise you meet everyd day half of your friends
-
-        if len(self.friends) > 1:
-            num = int(round(len(self.friends) * self.simulation.lockdown_schedule[self.simulation.day], 0))
-                
-            friend_contacts = random.sample(self.friends, num)
-        else:
-            friend_contacts = self.friends
-
-        self.contacts = friend_contacts + rand_contacts
-        #self.contacts_hist.append({'day': self.simulation.day, 'contacts': self.contacts}, ignore_index=True)
+        result = []
+        for person in self.friends:
+            result.append({'infector': self, 'infected': person})
+        for person in rand_contacts:
+            result.append({'infector': self, 'infected': person})
+        return result
 
     def init_num_of_friends(self):
-        return int((norm.rvs(size=1,loc=0.5,scale=0.15)[0] * self.simulation.average_friends_num * 2).round(0))
+        return int((norm.rvs(size=1,loc=0.5,scale=0.15)[0] * self.simulation.avg_friends_num * 2).round(0))
     
-    def accepts_friends(self):  
-        return len(friends) < num_of_friends 
+    def accepts_friends(self): 
+        """
+        Accept friends if you habe less than 3 * avg_friends_num
+        """
+        return len(self.friends) < self.simulation.avg_friends_num * 3
 
     def init_friends(self):
         num = self.num_of_friends - len(self.friends)
         num = 0 if num < 0 else num
-        persons_accepting_friends = [person for person in self.simulation.peopleDictionary if person.accepts_friends]
-        
-        new_friends = random.sample(persons_accepting_friends, num)
-        self.friends += new_friends
+        persons_accepting_friends = [person for person in self.simulation.peopleDictionary if person.accepts_friends()]
+        self.friends = random.sample(persons_accepting_friends, num)
         # only for new friends
-        for friend in new_friends:
-            friend.friends.append(self)
+        for friend in self.friends:
+            if friend.index != self.index:
+                friend.friends.append(self)
 
-    def wearMask(self):
-        self.contagiousness *= self.simulation.mask_efficiency
-
-    def init_immunity(self)-> int:
-        if self.status != 'r':
-            result =  int((norm.rvs(size=1,loc=self.simulation.average_immunity/100,scale=0.15)[0]*100).round(0))
-            result = 0 if result < 0 else result
-            self.immunity = result
-
-    def init_contagiousness(self):
-        fact = self.simulation.average_contagiousness / 100 * self.simulation.mask_schedule[self.simulation.day]
-        self.contagiousness = int((norm.rvs(size=1,loc=fact,scale=0.15)[0]*100).round(0))
-        
 
     def is_contagious(self):
-        return (self.contagiousness > 0 and self.status != 'd')
+        return (self.status == 'a')
 
-    def meet(self, person: object):
-        person.init_immunity()
-
-        status = person.status
-        infected = False
-        if self.contagiousness > person.immunity and person.status == 'h': 
-            person.init_contagiousness()
-            person.infected_by = self.index
+    def infect(self, person: object):
+        has_infected = False
+        if person.status == 'h': 
             person.infection_day = self.simulation.day
             person.status = 'a'
-            self.simulation.total_infections += 1
+            person.infected_by = self
+            has_infected = True
             self.simulation.daily_infections += 1
-            self.num_infected += 1
-            infected = True
-        else:
-            infected = False
+            self.simulation.total_infections +=1
         self.num_contacts += 1
-        self.simulation.daily_contacts += 1
-        self.simulation.total_contacts += 1
-        row = {'day': self.simulation.day, 'infector_id':self.index, 'contagiousness':self.contagiousness, 
-            'contact_id': person.index, 'immunity':person.immunity, 'status before': status, 'result': infected,
+        row = {'day': self.simulation.day, 'infector_id':self.index, 
+            'contact_id': person.index,
             'is_lockdown_day': self.simulation.lockdown_schedule[self.simulation.day] < 1,
-            'is_mask_day': self.simulation.mask_schedule[self.simulation.day] < 1,}
+            'is_mask_day': self.simulation.mask_schedule[self.simulation.day] < 1,
+            'has infected': has_infected,
+            }
         self.simulation.infections.append(row)
     
     def chance_to_die(self):
@@ -382,7 +367,7 @@ def get_plot(df, max_x: int, fields: list):
     data = df[df['legend'].isin(fields)]
     return alt.Chart(data).mark_line().encode(
         x=alt.X('day', scale=alt.Scale(domain=(0,max_x))),
-        y=alt.Y('value'),
+        y=alt.Y('cases'),
         color='legend').properties(
             width=800,
             height=400
