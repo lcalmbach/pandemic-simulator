@@ -105,17 +105,15 @@ class Simulation():
             json.dump(self.scenarios, myfile)
 
     def show_setting(self):
-        st.write(f"population: {self.num_people}")
-        st.write(f"simulation days: {self.simulation_days}")
+        st.write(f"Population: {self.num_people}")
+        st.write(f"Simulation days: {self.simulation_days}")
         st.write(f"Number of infected persons at t=0: {self.startingInfecters}")
         st.write(f"Average days of contagiousness: {self.avg_days_contagious}")
         st.write(f"Average number of friends: {self.avg_friends_num}")
         st.write(f"Average number of random contacts: {self.avg_contacts_num}")
-        st.write(f"Mask efficiency (% reduction of ratio infections/contacts): {self.mask_efficiency}")
-        st.write(f"lockdown efficiency (reduction of contacts %): {self.lockdown_efficiency}")
-        st.write(f"Average chance infection per contact: {self.avg_chance_infection}")
-        st.write(f"lockdown: from day {self.lockdown_day_start} to day {self.lockdown_day_end}")
-        st.write(f"lockdown reduces contacts by {self.lockdown_efficiency}%")
+        st.write(f"Average probability of infection per contact: {self.avg_chance_infection}")
+        st.write(f"Lockdown: from day {self.lockdown_day_start} to day {self.lockdown_day_end}")
+        st.write(f"Lockdown reduces contacts by {self.lockdown_efficiency}%")
         st.write(f"Mask mandatory from day {self.mask_day_start} to day {self.mask_day_end}")
         st.write(f"Masks reduce risk of contagion by {self.mask_efficiency}%")
 
