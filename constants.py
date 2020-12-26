@@ -5,7 +5,7 @@ GIT_INFO = """This app was implemented by [Lukas Calmbach](mailto:lcalmbach@gmai
 The simulation code was adapted from [Terence Shin](https://terenceshin.medium.com/).
 The code can be found on [github](https://github.com/lcalmbach/pandemic-simulator)"""
 MENU_LIST = ['Info', 'Define scenario', 'Run Scenario']
-SETTINGS_FILENAME = './temp/scenarios.json'
-POPULATION_FILENAME = './temp/population.csv'
-INFECTIONS_FILENAME = './temp/infections.csv'
-TIMESERIES_FILENAME = './temp/timeseries.csv'
+SETTINGS_FILENAME = './tmp/scenarios.json'
+POPULATION_FILENAME = './tmp/population.csv'
+INFECTIONS_FILENAME = './tmp/infections.csv'
+TIMESERIES_FILENAME = './tmp/timeseries.csv'
