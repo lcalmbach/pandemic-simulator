@@ -62,7 +62,8 @@ def show_define_scenario_menu(sim):
             st.experimental_rerun
 
 def read_scenarios():
-    with open('scenarios.json', 'r') as myfile:
+    st.write(cn.SETTINGS_FILENAME)
+    with open(cn.SETTINGS_FILENAME, 'r') as myfile:
         data=myfile.read()
         return json.loads(data)
 

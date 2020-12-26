@@ -5,6 +5,7 @@ import streamlit as st
 import altair as alt
 import pandas as pd
 import json
+import constants as cn
 
 
 class Simulation():
@@ -48,6 +49,7 @@ class Simulation():
     def load(self): 
         setup = self.scenarios[self.name]
         
+        self.num_people = setup["num_people"]
         self.startingInfecters = setup["startingInfecters"]
         self.avg_days_contagious = setup["avg_days_contagious"]
         self.lockdown_day_start = setup["lockdown_day_start"]
@@ -62,12 +64,11 @@ class Simulation():
         self.avg_chance_infection = setup["avg_chance_infection"] 
         self.std_factor = setup["std_factor"]
 
-
         self.mortality_rate = setup["mortality_rate"]
         self.hospitalization_rate = setup["hospitalization_rate"]
         self.avg_hospitalization_duration = setup["avg_hospitalization_duration"]
         self.hospital_beds_per_1k_persons = setup["hospital_beds_per_1k_persons"]
-        self.num_people = setup["num_people"]
+        
         self.num_elderly = setup["num_elderly"]
         self.num_midage = setup["num_midage"]
         self.num_young = setup["num_young"]
@@ -101,7 +102,7 @@ class Simulation():
         #setup["avg_hospitalization_duration"] = self.avg_hospitalization_duration 
         #setup["hospital_beds_per_1k_persons"] = self.hospital_beds_per_1k_persons 
         
-        with open('scenarios.json', 'wt') as myfile:
+        with open(cn.SETTINGS_FILENAME, 'wt') as myfile:
             json.dump(self.scenarios, myfile)
 
     def show_setting(self):
@@ -132,20 +133,17 @@ class Simulation():
             if x >= self.lockdown_day_start and x <= self.lockdown_day_end:
                 self.lockdown_schedule[x] = 1 - (self.lockdown_efficiency /100)
   
-
+    @st.cache
     def initiate_peopleDictionary(self):
 
         def initiate_age_groups():
-            st.info('initializing elderly')
             cat_elderly = random.sample(self.peopleDictionary,self.num_elderly)
             for person in cat_elderly:
                 person.age_group = 1
-            st.info('initializing midage')
             cat_young_midage = list(set(self.peopleDictionary) - set(cat_elderly))
             cat_midage = random.sample(cat_young_midage,self.num_midage)
             for person in cat_midage:
                 person.age_group = 2
-            st.info('initializing young')
             cat_young = list(set(cat_young_midage) - set(cat_midage))    
             for person in cat_young:
                 person.age_group = 3
@@ -162,7 +160,6 @@ class Simulation():
         # initiate_age_groups()
         print('population initialized')
         
-
     def runDay(self):
         #this section simulates the spread, so it only operates on contagious people, thus:
         all_contacts = []
@@ -235,10 +232,9 @@ class Simulation():
             if num_infected == 0:
                 break
         
-        df.to_csv('timeseries.csv', index = False, sep = ';') 
-        pop_df = generate_population_df()
-        pop_df.to_csv('population.csv', index = False, sep = ';') 
-        pd.DataFrame(self.infections).to_csv('infections.csv', index = False, sep = ';') 
+        df.to_csv(cn.TIMESERIES_FILENAME, index = False, sep = ';') 
+        generate_population_df().to_csv(cn.POPULATION_FILENAME, index = False, sep = ';') 
+        pd.DataFrame(self.infections).to_csv(cn.INFECTIONS_FILENAME, index = False, sep = ';') 
         
 
 class Day():
