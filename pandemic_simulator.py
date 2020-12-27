@@ -104,7 +104,7 @@ class Simulation():
         
         with open(cn.SETTINGS_FILENAME, 'wt') as myfile:
             json.dump(self.scenarios, myfile)
-            close()
+            myfile.close()
 
     def show_setting(self):
         st.write(f"Population: {self.num_people}")

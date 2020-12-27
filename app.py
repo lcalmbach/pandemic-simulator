@@ -64,7 +64,8 @@ def show_define_scenario_menu(sim):
 def read_scenarios():
     with open(cn.SETTINGS_FILENAME, 'r') as myfile:
         data=myfile.read()
-        return json.loads(data)
+        myfile.close()
+    return json.loads(data)
 
 def get_scenario_list(scenarios):
     result = []    
