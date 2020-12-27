@@ -102,7 +102,7 @@ class Simulation():
         #setup["avg_hospitalization_duration"] = self.avg_hospitalization_duration 
         #setup["hospital_beds_per_1k_persons"] = self.hospital_beds_per_1k_persons 
         
-        with open(cn.SETTINGS_FILENAME, 'wt') as myfile:
+        with open(cn.SETTINGS_FILENAME, 'w') as myfile:
             json.dump(self.scenarios, myfile)
             myfile.close()
 
