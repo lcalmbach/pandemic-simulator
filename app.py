@@ -3,7 +3,7 @@ from  pandemic_simulator import Simulation
 import constants as cn
 import json
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __author__ = 'lcalmbach@gmail.com'
 
 
@@ -36,12 +36,12 @@ def show_define_scenario_menu(sim):
         #sim.mortality_rate = st.number_input("Mortality rate (per day and 1000 hospitalized)",0.0,1000/sim.avg_days_contagious, value=float(sim.mortality_rate))
   
     with st.beta_expander("Measures", expanded=True):
-        sim.lockdown_day_start =  st.number_input("Start day for lockdown", 0,sim.simulation_days,sim.lockdown_day_start)
-        sim.lockdown_day_end =  st.number_input("End day for lockdown", 0,sim.simulation_days,sim.lockdown_day_end)
+        sim.lockdown_day_start =  st.number_input("First day for lockdown", 0,sim.simulation_days,sim.lockdown_day_start)
+        sim.lockdown_day_end =  st.number_input("Last day for lockdown", 0,sim.simulation_days,sim.lockdown_day_end)
         sim.lockdown_efficiency = st.number_input("lockdown reduces encounters by (%)", 0,100,50)
-        sim.mask_day_start =  st.number_input("Start day for masks to be used", 0,sim.simulation_days,sim.mask_day_start)
-        sim.mask_day_end =  st.number_input("End day for masks to be used", 0,sim.simulation_days,sim.mask_day_end)
-        sim.mask_efficiency = st.number_input("Masks reduces risk of infection by (%))", 0,100,sim.mask_efficiency)
+        sim.mask_day_start =  st.number_input("First day for masks to be used", 0,sim.simulation_days,sim.mask_day_start)
+        sim.mask_day_end =  st.number_input("Last day for masks to be used", 0,sim.simulation_days,sim.mask_day_end)
+        sim.mask_efficiency = st.number_input("Masks reduce risk of infection by (%))", 0,100,sim.mask_efficiency)
         
     sim.save()
     st.write()
@@ -96,7 +96,7 @@ def main():
         if st.button("Start Simulation"):
             sim.run()
 
-    st.sidebar.info(cn.GIT_INFO)
+    st.sidebar.info(cn.GIT_INFO.format(__version__))
     
 main()
     

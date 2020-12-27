@@ -6,6 +6,29 @@ import altair as alt
 import pandas as pd
 import json
 import constants as cn
+import base64
+
+
+def download_link(object_to_download, download_filename, download_link_text, sep):
+    """
+    Generates a link to download the given object_to_download.
+
+    object_to_download (str, pd.DataFrame):  The object to be downloaded.
+    download_filename (str): filename and extension of file. e.g. mydata.csv, some_txt_output.txt
+    download_link_text (str): Text to display for download link.
+
+    Examples:
+    download_link(YOUR_DF, 'YOUR_DF.csv', 'Click here to download data!')
+    download_link(YOUR_STRING, 'YOUR_STRING.txt', 'Click here to download your text!')
+
+    """
+    if isinstance(object_to_download,pd.DataFrame):
+        object_to_download = object_to_download.to_csv(index=False, sep=sep)
+
+    # some strings <-> bytes conversions necessary here
+    b64 = base64.b64encode(object_to_download.encode()).decode()
+
+    return f'<a href="data:file/txt;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
 
 
 class Simulation():
@@ -69,6 +92,7 @@ class Simulation():
         self.avg_hospitalization_duration = setup["avg_hospitalization_duration"]
         self.hospital_beds_per_1k_persons = setup["hospital_beds_per_1k_persons"]
         
+        self.peopleDictionary = []
         self.num_elderly = setup["num_elderly"]
         self.num_midage = setup["num_midage"]
         self.num_young = setup["num_young"]
@@ -106,6 +130,7 @@ class Simulation():
             json.dump(self.scenarios, myfile)
             myfile.close()
 
+
     def show_setting(self):
         st.write(f"Population: {self.num_people}")
         st.write(f"Simulation days: {self.simulation_days}")
@@ -134,11 +159,11 @@ class Simulation():
             if x >= self.lockdown_day_start and x <= self.lockdown_day_end:
                 self.lockdown_schedule[x] = 1 - (self.lockdown_efficiency /100)
   
-    @st.cache
+
     def initiate_peopleDictionary(self):
 
         def initiate_age_groups():
-            cat_elderly = random.sample(self.peopleDictionary,self.num_elderly)
+            cat_elderly = random.sample(self.peopleDictionary, self.num_elderly)
             for person in cat_elderly:
                 person.age_group = 1
             cat_young_midage = list(set(self.peopleDictionary) - set(cat_elderly))
@@ -189,6 +214,7 @@ class Simulation():
         st.info('Population is initialized')
 
         day_text = st.empty()
+        result_text = st.empty()
         plot_infections = st.empty()
         plot_r = st.empty()
         plot_fatalities = st.empty()
@@ -216,8 +242,8 @@ class Simulation():
             num_immune = len([person for person in self.peopleDictionary if person.status == 'r'])
             immune_pct = round((num_immune / self.num_people * 100),0)
             
-            day_text.write(f'day {x+1}: people infected, Total infected={num_infected},{self.total_infections} immune: {num_immune} ({immune_pct}%)')
-            
+            day_text.markdown(f'### day {x+1}')
+            result_text.write(f'people infected: {num_infected}, total infected: {self.total_infections} immune: {num_immune} ({immune_pct}%)')
             data = {'day': x,'legend': 'num_infected', 'cases': num_infected}
             df = df.append(data, ignore_index=True)
             data = {'day': x,'legend': 'num_immune', 'cases': num_immune}
@@ -233,10 +259,18 @@ class Simulation():
             if num_infected == 0:
                 break
         
-        df.to_csv(cn.TIMESERIES_FILENAME, index = False, sep = ';') 
-        generate_population_df().to_csv(cn.POPULATION_FILENAME, index = False, sep = ';') 
-        pd.DataFrame(self.infections).to_csv(cn.INFECTIONS_FILENAME, index = False, sep = ';') 
-        
+
+        with st.beta_expander("Download results as csv file", expanded=True):
+            tmp_download_link = download_link(df, cn.TIMESERIES_FILENAME, 'Click here to download plot data', ';')
+            st.markdown(tmp_download_link, unsafe_allow_html=True)
+
+            df = generate_population_df() 
+            tmp_download_link = download_link(df, cn.POPULATION_FILENAME, 'Click here to download population details', ';')
+            st.markdown(tmp_download_link, unsafe_allow_html=True)
+
+            df = pd.DataFrame(self.infections)
+            tmp_download_link = download_link(df, cn.INFECTIONS_FILENAME, 'Click here to download infections details', ';')
+            st.markdown(tmp_download_link, unsafe_allow_html=True)
 
 class Day():
     def __init__(self):
