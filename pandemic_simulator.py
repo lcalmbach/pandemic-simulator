@@ -128,7 +128,6 @@ class Simulation():
         
         with open(cn.SETTINGS_FILENAME, 'w') as myfile:
             json.dump(self.scenarios, myfile)
-            myfile.close()
 
 
     def show_setting(self):

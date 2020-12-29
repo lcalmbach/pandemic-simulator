@@ -3,7 +3,7 @@ from  pandemic_simulator import Simulation
 import constants as cn
 import json
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 __author__ = 'lcalmbach@gmail.com'
 
 
@@ -64,7 +64,6 @@ def show_define_scenario_menu(sim):
 def read_scenarios():
     with open(cn.SETTINGS_FILENAME, 'r') as myfile:
         data=myfile.read()
-        myfile.close()
     return json.loads(data)
 
 def get_scenario_list(scenarios):
