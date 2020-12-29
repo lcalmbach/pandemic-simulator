@@ -9,3 +9,6 @@ The code can be found on [github](https://github.com/lcalmbach/pandemic-simulato
 MENU_LIST = ['Info', 'Define scenario', 'Run Scenario']
 
 SETTINGS_FILENAME = os.path.join("tmp", "scenarios.json")
+POPULATION_FILENAME = "population.csv"
+INFECTIONS_FILENAME = "infections.csv"
+TIMESERIES_FILENAME = "timeseries.csv"

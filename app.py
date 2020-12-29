@@ -3,7 +3,7 @@ from  pandemic_simulator import Simulation
 import constants as cn
 import json
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 __author__ = 'lcalmbach@gmail.com'
 
 
